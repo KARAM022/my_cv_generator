@@ -3,3 +3,11 @@
 **/*.jpg
 **/*.jpeg
 **/*.png
+
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+data/cv_data.json

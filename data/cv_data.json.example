@@ -1,0 +1,39 @@
+{
+  "pdf_filename": "Ouafik_Karam.pdf",
+  "name": "Your Full Name",
+  "contact": "City | +212 600-000000 | your.email@example.com",
+  "description": "Write a brief professional summary here. This will appear below your name and contact details.",
+  "skills": {
+    "title": "Technical Skills",
+    "subsections": [
+      {
+        "subtitle": "Web Development",
+        "content": "Front‑End: HTML, CSS, JavaScript, React\nBack‑End: Python, Node.js\nDatabase: MySQL, MongoDB"
+      }
+    ]
+  },
+  "experience": {
+    "title": "Professional Experience",
+    "entries": [
+      {
+        "company": "Company Name",
+        "duration": "01/2024 – Present",
+        "title": "Job Title",
+        "tasks": "Briefly describe your main tasks and achievements.\nAdd more lines as needed."
+      }
+    ]
+  },
+  "education": {
+    "title": "Education",
+    "entries": [
+      {
+        "formation": "Degree Name",
+        "institution_duration": "University Name – 2024"
+      }
+    ]
+  },
+  "languages": {
+    "title": "Languages",
+    "content": "Arabic: Native | English: Intermediate | French: Operational"
+  }
+}
