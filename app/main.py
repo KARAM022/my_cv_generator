@@ -3,41 +3,53 @@ from pathlib import Path
 from fpdf import FPDF
 
 
+# ----------------------------------------------------------------------
+# Paths
+# ----------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parents[1]
 FONT_PATH = BASE_DIR / "assets" / "fonts" / "DejaVuSans-Bold.ttf"
 IMAGE_PATH = BASE_DIR / "assets" / "images" / "image.png"
 OUTPUT_DIR = BASE_DIR / "output"
 
+
 class CVGenerator:
     """
     A class to generate a CV PDF with a profile image, name, contact details,
-    a separator line, and a description.
+    a separator line, and sections for description, skills, experience,
+    education, and languages.
     """
 
+    # ------------------------------------------------------------------
+    # Layout constants
+    # ------------------------------------------------------------------
+    # Profile block
+    PROFILE_X = 5.4
+    PROFILE_Y = 0.1
+    PROFILE_MARGIN_AFTER_NAME = 0.3
+
+    # Section placement (after profile)
+    SECTION_X = 1.25
+    SECTION_Y_START = 4.0
+
+    # Default spacing increments (used by _add_space)
+    SPACE_AFTER_LINE = 0.3
+    SPACE_AFTER_SUBTITLE = 0.1
+    SPACE_BETWEEN_SKILLS_SECTIONS = 0.1
+    SPACE_BETWEEN_SECTIONS = 0.4
+    SPACE_BETWEEN_EXPERIENCE_COMPANY_AND_TITLE = 0.1
+    SPACE_AFTER_EXPERIENCE_TITLE = 0.1
+    SPACE_BETWEEN_EXPERIENCE_ENTRIES = 0.3
+    SPACE_BETWEEN_EDUCATION_ENTRIES = 0.1
+
+    # ------------------------------------------------------------------
     def __init__(self):
-        # Initialize PDF document (portrait, centimeters, A4)
+        # Initialise PDF document (portrait, centimetres, A4)
         self.pdf = FPDF("P", "cm", "A4")
         self.pdf.add_page()
-        self.pdf.add_font("DejaVu", "", str(FONT_PATH))  # Load DejaVu for Unicode support
+        self.pdf.add_font("DejaVu", "", str(FONT_PATH))   # Unicode support
         self.pdf.set_auto_page_break(auto=True, margin=0)
 
-        # Layout constants (same as original code)
-        self.profile_x = 5.4      # X coordinate for text block
-        self.profile_y = 0.1      # Initial Y coordinate for text block
-        self.default_space = 0.3  # Vertical gap adjustment
-
-        self.default_y = 4  # Y coordinate for sections after profile
-        self.default_x = 1.25  # X coordinate for sections after profile
-        self.default_space_after_line = 0.3  # Space after separator line
-        self.default_space_after_subtitle = 0.1  # Space after section subtitles
-        self.default_space_between_skills_sections = 0.1  # Space between skills subsections
-        self.default_space_between_sections = 0.4  # Space between main sections (skills, experience, education, languages)
-        self.default_space_between_experience_company_and_title = 0.1  # Space between company/duration line and title in experience section
-        self.default_space_after_experience_title = 0.1  # Space after experience title before tasks
-        self.default_space_between_experience_entries = 0.3  # Space between experience entries
-        self.default_space_between_education_entries = 0.1  # Space between education entries
-
-        # Build the CV by calling each component in order
+        # Build the CV sections in order
         self._add_image()
         self._add_name()
         self._add_contact()
@@ -51,191 +63,205 @@ class CVGenerator:
         self._space_between_sections()
         self._add_languages_section()
 
-    # ----------------------------------------------------------------------
-    # Private methods for style and layout (e.g., adding images, setting fonts, drawing lines)
-    # ----------------------------------------------------------------------
-    def _text_single_line(self, variant="normal", text="Sample Text", ln=True, align="L"):
-        """Helper method to add a single line of text with consistent styling."""
-        self.pdf.set_font(
-            "Arial",
-            "" if variant == "normal" else "B",
-            12 if variant == "title" else 10
-        )
-        self.pdf.cell(
-            0,
-            0.5 if variant == "title" else 0.4,
-            text,
-            ln=ln,
-            align=align
-        )
+    # ------------------------------------------------------------------
+    # Public method
+    # ------------------------------------------------------------------
+    def save(self, filename: str = "cv.pdf") -> None:
+        """Output the PDF to the given filename inside the output directory."""
+        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        self.pdf.output(str(OUTPUT_DIR / filename))
 
-    def _left_align(self):
-        """Set left alignment for the current line."""
-        self.pdf.set_x(self.default_x)
+    # ==================================================================
+    # Helper methods for common PDF operations
+    # ==================================================================
+    def _reset_x(self) -> None:
+        """Move cursor to the default left margin (for sections)."""
+        self.pdf.set_x(self.SECTION_X)
 
-    def _space_after_line(self, space=None):
-        """Add vertical space after the current line."""
-        if space is None:
-            space = self.default_space_after_line
-        self.pdf.set_xy(self.default_x, self.pdf.get_y() + space)
+    def _add_space(self, space: float) -> None:
+        """Add a vertical gap (cm) from the current position, keeping the left margin."""
+        self.pdf.set_xy(self.SECTION_X, self.pdf.get_y() + space)
 
-    def _space_after_subtitle(self, space=None):
-        """Add vertical space after a subtitle."""
-        if space is None:
-            space = self.default_space_after_subtitle
-        self.pdf.set_xy(self.default_x, self.pdf.get_y() + space)
-
-    def _space_between_skills_sections(self, space=None):
-        """Add vertical space between skills subsections."""
-        if space is None:
-            space = self.default_space_between_skills_sections
-        self.pdf.set_xy(self.default_x, self.pdf.get_y() + space)
-
-    def _space_between_sections(self, space=None):
-        """Add vertical space between main sections (skills, experience, education, languages)."""
-        if space is None:
-            space = self.default_space_between_sections
-        self.pdf.set_xy(self.default_x, self.pdf.get_y() + space)
-    
-    def _space_between_experience_company_and_title(self, space=None):
-        """Add vertical space between company/duration line and title in experience section."""
-        if space is None:
-            space = self.default_space_between_experience_company_and_title
-        self.pdf.set_xy(self.default_x, self.pdf.get_y() + space)
-    
-    def _space_after_experience_title(self, space=None):
-        """Add vertical space after experience title before tasks."""
-        if space is None:
-            space = self.default_space_after_experience_title
-        self.pdf.set_xy(self.default_x, self.pdf.get_y() + space)
-    
-    def _space_between_experience_entries(self, space=None):
-        """Add vertical space between experience entries."""
-        if space is None:
-            space = self.default_space_between_experience_entries
-        self.pdf.set_xy(self.default_x, self.pdf.get_y() + space)
-    
-    def _space_between_education_entries(self, space=None):
-        """Add vertical space between education entries."""
-        if space is None:
-            space = self.default_space_between_education_entries
-        self.pdf.set_xy(self.default_x, self.pdf.get_y() + space)
-
-    
-    # ----------------------------------------------------------------------
-    # Private methods for each part of the CV
-    # ----------------------------------------------------------------------
-    def _add_image(self):
-        """Insert the profile image at fixed coordinates."""
-        img_info = {
-            "path": IMAGE_PATH,
-            "width": 3,
-            "height": 3,
-            "x": 1.25,
-            "y": 0.6
+    def _text_line(
+        self,
+        text: str = "Sample Text",
+        variant: str = "normal",
+        ln: bool = True,
+        align: str = "L",
+    ) -> None:
+        """
+        Print a single line of text using predefined font styles.
+        Variants: 'title' (Bold 12pt), 'subtitle' (Bold 10pt), 'normal' (Regular 10pt).
+        """
+        style_map = {
+            "title":    ("Arial", "B", 12),
+            "subtitle": ("Arial", "B", 10),
+            "normal":   ("Arial", "",  10),
         }
-        self.pdf.image(
-            img_info["path"],
-            x=img_info["x"],
-            y=img_info["y"],
-            h=img_info["height"],
-            w=img_info["width"]
-        )
+        font, style, size = style_map.get(variant, style_map["normal"])
+        self.pdf.set_font(font, style, size)
 
-        # Set initial position for text after adding the image
-        self.pdf.set_xy(self.profile_x, self.profile_y)
+        height = 0.5 if variant == "title" else 0.4
+        self.pdf.cell(0, height, text, ln=ln, align=align)
 
-    def _add_name(self):
-        """Add the full name and adjust vertical position for the next element."""
-        name_info = {
-            "font": "Arial",
-            "style": "",
-            "size": 32,
-            "width": 0,
-            "height": 1.34,
-            "ln": True,
-            "name": "Ouaifik Karam"
-        }
-        self.pdf.set_font(name_info["font"], name_info["style"], name_info["size"])
-        self.pdf.cell(name_info["width"], name_info["height"], name_info["name"], ln=name_info["ln"])
-
-        # Move cursor slightly upward to reduce gap before contact details
-        self.pdf.set_xy(self.profile_x, self.pdf.get_y() - self.default_space)
-
-    def _add_contact(self):
-        """Add the contact information line."""
-        contact_info = {
-            "font": "Arial",
-            "style": "",
-            "size": 14,
-            "width": 0,
-            "height": 1,
-            "ln": True,
-            "contact": "Casablanca | +212 608-310554 | ouafik0karam@gmail.com"
-        }
-        self.pdf.set_font(contact_info["font"], contact_info["style"], contact_info["size"])
-        self.pdf.cell(contact_info["width"], contact_info["height"], contact_info["contact"], ln=contact_info["ln"])
-
-    def _add_separator_line(self):
-        """Draw a black horizontal line below the contact info."""
+    def _draw_line(self, x1: float, y1: float, x2: float = 20.0) -> None:
+        """Draw a thin black horizontal line."""
         self.pdf.set_draw_color(0, 0, 0)
-        y_line = self.pdf.get_y() - 0.1   # Position line slightly above the current cursor
-        self.pdf.line(self.profile_x, y_line, 20, y_line)
+        self.pdf.line(x1, y1, x2, y1)
 
-        # Move cursor down slightly to create space after the line
-        self.pdf.set_xy(self.profile_x, self.pdf.get_y())
+    def _multi_line_text(self, font: str, style: str, size: int, height: float, text: str) -> None:
+        """Write multi‑line text using multi_cell."""
+        self.pdf.set_font(font, style, size)
+        self.pdf.multi_cell(0, height, text)
 
-    def _add_description(self):
-        """Add the multi‑line professional description."""
-        desc_info = {
-            "font": "Arial",
-            "style": "",
-            "size": 10,
-            "width": 0,
-            "height": 0.45,
-            "ln": True,
-            "desc": (
-                "Fullstack Developer & Data Engineer, specialise en developpement d'applications web "
-                "et en gestion de donnees. Competent en front-end/back-end et en ingenierie des donnees, "
-                "je transforme les besoins metiers en solutions performantes. Rigoureux et motive, "
-                "je suis ouvert a de nouvelles opportunites."
-            )
-        }
-        self.pdf.set_font(desc_info["font"], desc_info["style"], desc_info["size"])
-        self.pdf.multi_cell(desc_info["width"], desc_info["height"], desc_info["desc"])
+    def _list_from_text(self, text: str) -> None:
+        """
+        Render bulleted list items.
+        Each line of `text` becomes a bullet point; safe width is 17.5 cm.
+        """
+        lines = text.split("\n")
+        usable_width = 17.5
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
 
-        # After description, we can set the position for the next section title
-        self.pdf.set_xy(self.default_x, self.default_y)
+            # Bullet
+            self.pdf.set_xy(self.SECTION_X + 0.2, self.pdf.get_y())
+            self.pdf.set_font("DejaVu", "", 10)
+            self.pdf.cell(0.4, 0.45, "•", ln=0, align="C")
 
-    def _add_skills_section(self):
-        """Add a 'Skills' section with a title and placeholder content."""
-        self._add_sections_title("Compétences Techniques")
-        self._add_skills_section_subtitle("Développement Fullstack")
-        skills_content = (
-            "Front-End : HTML, CSS, JavaScript, React.js, Bootstrap, JQuery, Responsive/Mobile-first design, Optimisation web\n"
-            "Back-End : PHP, Python, Laravel, Node.js, Express.js\n"
-            "Mobile : React Native, Flutter\n"
-            "Bases de données : MySQL, MongoDB\n"
-            "DevOps & Outils : Git, GitHub, GitLab, Nginx, Linux, Shell scripting\n"
-            "Méthodologies : Agile (Scrum)\n"
-            "Sécurité : Sécurité des applications web, déploiement & maintenance serveurs"
+            # Text
+            self.pdf.set_font("Arial", "", 10)
+            self.pdf.set_xy(self.pdf.get_x(), self.pdf.get_y())
+            self.pdf.multi_cell(usable_width, 0.45, line)
+
+        self.pdf.set_xy(self.SECTION_X, self.pdf.get_y())
+
+    # ------------------------------------------------------------------
+    # Specific spacing methods (thin wrappers around _add_space)
+    # ------------------------------------------------------------------
+    def _space_after_line(self) -> None:
+        self._add_space(self.SPACE_AFTER_LINE)
+
+    def _space_after_subtitle(self) -> None:
+        self._add_space(self.SPACE_AFTER_SUBTITLE)
+
+    def _space_between_skills_sections(self) -> None:
+        self._add_space(self.SPACE_BETWEEN_SKILLS_SECTIONS)
+
+    def _space_between_sections(self) -> None:
+        self._add_space(self.SPACE_BETWEEN_SECTIONS)
+
+    def _space_between_experience_company_and_title(self) -> None:
+        self._add_space(self.SPACE_BETWEEN_EXPERIENCE_COMPANY_AND_TITLE)
+
+    def _space_after_experience_title(self) -> None:
+        self._add_space(self.SPACE_AFTER_EXPERIENCE_TITLE)
+
+    def _space_between_experience_entries(self) -> None:
+        self._add_space(self.SPACE_BETWEEN_EXPERIENCE_ENTRIES)
+
+    def _space_between_education_entries(self) -> None:
+        self._add_space(self.SPACE_BETWEEN_EDUCATION_ENTRIES)
+
+    # ==================================================================
+    # CV building blocks
+    # ==================================================================
+    def _add_image(self) -> None:
+        """Insert the profile picture at a fixed position."""
+        self.pdf.image(
+            str(IMAGE_PATH),
+            x=1.25,
+            y=0.6,
+            w=3,
+            h=3,
         )
-        self._format_text_to_list(skills_content)
+        # Set initial text cursor for the profile block
+        self.pdf.set_xy(self.PROFILE_X, self.PROFILE_Y)
+
+    def _add_name(self) -> None:
+        """Add the full name and adjust Y for the next line."""
+        self.pdf.set_font("Arial", "", 32)
+        self.pdf.cell(0, 1.34, "Ouaifik Karam", ln=True)
+        # Lift cursor slightly to reduce gap before contact details
+        self.pdf.set_xy(self.PROFILE_X, self.pdf.get_y() - self.PROFILE_MARGIN_AFTER_NAME)
+
+    def _add_contact(self) -> None:
+        """Add contact information on one line."""
+        self.pdf.set_font("Arial", "", 14)
+        self.pdf.cell(0, 1, "Casablanca | +212 608-310554 | ouafik0karam@gmail.com", ln=True)
+
+    def _add_separator_line(self) -> None:
+        """Draw a black horizontal line below the contact info."""
+        y_line = self.pdf.get_y() - 0.1
+        self._draw_line(self.PROFILE_X, y_line)
+        self.pdf.set_xy(self.PROFILE_X, self.pdf.get_y())
+
+    def _add_description(self) -> None:
+        """Multi‑line professional description."""
+        desc = (
+            "Fullstack Developer & Data Engineer, specialise en developpement d'applications web "
+            "et en gestion de donnees. Competent en front-end/back-end et en ingenierie des donnees, "
+            "je transforme les besoins metiers en solutions performantes. Rigoureux et motive, "
+            "je suis ouvert a de nouvelles opportunites."
+        )
+        self._multi_line_text("Arial", "", 10, 0.45, desc)
+        # After description, move to the standard section start position
+        self.pdf.set_xy(self.SECTION_X, self.SECTION_Y_START)
+
+    # ------------------------------------------------------------------
+    # Section title with underline
+    # ------------------------------------------------------------------
+    def _add_section_title(self, title: str) -> None:
+        """Print a bold section title and underline it."""
+        self._text_line(title, variant="title")
+        self._reset_x()
+        self._draw_line(self.SECTION_X, self.pdf.get_y())
+        self._space_after_line()
+
+    # ------------------------------------------------------------------
+    # Skills section
+    # ------------------------------------------------------------------
+    def _add_skills_section(self) -> None:
+        self._add_section_title("Compétences Techniques")
+        self._add_skills_subsection(
+            "Développement Fullstack",
+            (
+                "Front-End : HTML, CSS, JavaScript, React.js, Bootstrap, JQuery, Responsive/Mobile-first design, Optimisation web\n"
+                "Back-End : PHP, Python, Laravel, Node.js, Express.js\n"
+                "Mobile : React Native, Flutter\n"
+                "Bases de données : MySQL, MongoDB\n"
+                "DevOps & Outils : Git, GitHub, GitLab, Nginx, Linux, Shell scripting\n"
+                "Méthodologies : Agile (Scrum)\n"
+                "Sécurité : Sécurité des applications web, déploiement & maintenance serveurs"
+            ),
+        )
         self._space_between_skills_sections()
-        self._add_skills_section_subtitle("Ingénierie des Données")
-        data_skills_content = (
-            "Data Mining & Statistical Analysis\n"
-            "Database Management: SQL & NoSQL (MySQL, MongoDB)\n"
-            "Data Warehousing & Visualization: Power BI, Python (Pandas, Matplotlib, Seaborn)\n"
-            "Big Data Fundamentals: data acquisition, processing & quality management\n"
-            "Data Governance: data quality assurance & security"
+        self._add_skills_subsection(
+            "Ingénierie des Données",
+            (
+                "Data Mining & Statistical Analysis\n"
+                "Database Management: SQL & NoSQL (MySQL, MongoDB)\n"
+                "Data Warehousing & Visualization: Power BI, Python (Pandas, Matplotlib, Seaborn)\n"
+                "Big Data Fundamentals: data acquisition, processing & quality management\n"
+                "Data Governance: data quality assurance & security"
+            ),
         )
-        self._format_text_to_list(data_skills_content)
 
-    def _add_experience_section(self):
-        """Add an 'Experience' section with a title and placeholder content."""
-        self._add_sections_title("Expérience Professionnelle")
-        experience_content = [
+    def _add_skills_subsection(self, subtitle: str, content: str) -> None:
+        """Print a skills category subtitle followed by bullet points."""
+        self._reset_x()
+        self._text_line(subtitle, variant="subtitle")
+        self._space_after_subtitle()
+        self._list_from_text(content)
+
+    # ------------------------------------------------------------------
+    # Experience section
+    # ------------------------------------------------------------------
+    def _add_experience_section(self) -> None:
+        self._add_section_title("Expérience Professionnelle")
+        experiences = [
             {
                 "company": "GivenX",
                 "duration": "11/2025 - 03/2026",
@@ -243,7 +269,7 @@ class CVGenerator:
                 "tasks": (
                     "Conception, développement et déploiement d'applications web et mobiles.\n"
                     "Pilotage technique des projets : encadrement de l'équipe, répartition des tâches, revue de code et garantie de la qualité des livrables."
-                )
+                ),
             },
             {
                 "company": "ClickDigital",
@@ -252,7 +278,7 @@ class CVGenerator:
                 "tasks": (
                     "Développement de Flousafe (React.js, Next.js, Flutter) avec déploiement, sécurité et  optimisation des performances.\n"
                     "Conception d'interfaces responsives et modernes axées sur l'expérience utilisateur."
-                )
+                ),
             },
             {
                 "company": "23Digit",
@@ -261,7 +287,7 @@ class CVGenerator:
                 "tasks": (
                     "Développement de solutions web et mobiles de gestion de caisse (Laravel, Node.js, React,React Native, Flutter).\n"
                     "Déploiement et maintenance des applications sur serveurs pour l'ensemble des projets livrés."
-                )
+                ),
             },
             {
                 "company": "LMS Organisation & RH",
@@ -270,7 +296,7 @@ class CVGenerator:
                 "tasks": (
                     "Conception et intégration d'APIs et solutions middleware.\n"
                     "Documentation technique et optimisation des performances systèmes."
-                )
+                ),
             },
             {
                 "company": "Groupe Scolaire Khawater",
@@ -279,15 +305,40 @@ class CVGenerator:
                 "tasks": (
                     "Migration vers une architecture microservices.\n"
                     "Gestion de l'infrastructure web et assistance technique."
-                )
-            }
+                ),
+            },
         ]
-        self._add_experience_content(experience_content)
 
-    def _add_education_section(self):
-        """Add an 'Education' section with a title and placeholder content."""
-        self._add_sections_title("Formation")
-        education_content = [
+        for i, exp in enumerate(experiences):
+            self._add_one_experience(exp)
+            if i < len(experiences) - 1:
+                self._space_between_experience_entries()
+
+    def _add_one_experience(self, exp: dict) -> None:
+        """Render a single experience entry: company, duration, title, tasks."""
+        self._reset_x()
+        # Company name
+        self._text_line(exp["company"], variant="subtitle", ln=False)
+        # Duration (right aligned on the same line)
+        self._text_line(exp["duration"], variant="subtitle", align="R")
+
+        self._space_between_experience_company_and_title()
+
+        # Title
+        self._reset_x()
+        self._text_line(exp["title"], variant="normal")
+
+        self._space_after_experience_title()
+
+        # Tasks as bullet list
+        self._list_from_text(exp["tasks"])
+
+    # ------------------------------------------------------------------
+    # Education section
+    # ------------------------------------------------------------------
+    def _add_education_section(self) -> None:
+        self._add_section_title("Formation")
+        entries = [
             {
                 "formation": "Licence Professionnelle d'Université en Ingénierie des Données",
                 "institution-duration": "ENSAM - 2025",
@@ -303,108 +354,28 @@ class CVGenerator:
             {
                 "formation": "Baccalauréat / Sciences de la Vie et de la Terre",
                 "institution-duration": "Lycée Moulay Youssef - 2022",
-            }
+            },
         ]
-        self._add_education_content(education_content)
 
-    def _add_languages_section(self):
-        """Add a 'Languages' section with a title and placeholder content."""
-        self._left_align()
-        self._add_sections_title("Langues")
-        self._text_single_line(text="Arabe : Langue maternelle | Anglais : Intermédiaire | Français : Opérationnel")
+        for i, edu in enumerate(entries):
+            self._reset_x()
+            self._text_line(edu["formation"], ln=False)
+            self._text_line(edu["institution-duration"], ln=True, align="R")
+            if i < len(entries) - 1:
+                self._space_between_education_entries()
 
-    # ----------------------------------------------------------------------
-    # Private methods to add section's component (e.g., title, subtitle, content)
-    # ----------------------------------------------------------------------
-    def _add_sections_title(self, title):
-        """Add a section title (e.g., for skills or experience)."""
-        self._text_single_line(variant="title", text=title, ln=True)
-
-        self._left_align()
-
-        # add a line under the section title
-        self.pdf.set_draw_color(0, 0, 0)
-        y_line = self.pdf.get_y()
-        self.pdf.line(self.default_x, y_line, 20, y_line)
-
-        self._space_after_line()
-
-    def _add_skills_section_subtitle(self, subtitle):
-        """Add a subtitle for the skills section (e.g., for a specific skill category)."""
-        self._left_align()
-        self._text_single_line(variant="subtitle", text=subtitle)
-        self._space_after_subtitle()
-
-    def _add_experience_content(self, experience_content):
-        """Add the experience content with company, duration, title and tasks."""
-        for exp in experience_content:
-            self._left_align()
-            # Company and duration
-            self._text_single_line(variant="subtitle", text=f"{exp['company']}", ln=False)
-            self._text_single_line(variant="subtitle", text=f"{exp['duration']}", align="R")
-
-            self._space_between_experience_company_and_title()
-            # Title
-            self._left_align()
-            self._text_single_line(text=exp["title"])
-
-            self._space_after_experience_title()
-            # Tasks (formatted as bullet points)
-            self._format_text_to_list(exp["tasks"])
-            self._space_between_experience_entries() if exp != experience_content[-1] else None  # Add space between entries except after the last one
-
-    def _add_education_content(self, education_content):
-        """Add the education content with formation and institution-duration."""
-        for edu in education_content:
-            # set position for each education entry
-            self._left_align()
-            # Formation
-            self._text_single_line(text=f"{edu['formation']}", ln=False)
-            self._text_single_line(text=f"{edu['institution-duration']}", ln=True, align="R")
-
-            self._space_between_education_entries() if edu != education_content[-1] else None  # Add space between entries except after the last one
-
-    # ----------------------------------------------------------------------
-    # Private tools methods
-    # ----------------------------------------------------------------------
-    def _format_text_to_list(self, text):
-        """Add skills content with safe bullet layout."""
-
-        lines = text.split("\n")
-
-        # safe usable width (A4 = 21cm, margins included)
-        usable_width = 17.5  # adjust if needed
-
-        for line in lines:
-            line = line.strip()
-            if not line:
-                continue
-
-            # Bullet
-            self.pdf.set_xy(self.default_x + 0.2, self.pdf.get_y()) 
-            self.pdf.set_font("DejaVu", "", 10)
-            self.pdf.cell(0.4, 0.45, "•", ln=0, align="C")
-
-            # Text (IMPORTANT: reset X properly)
-            self.pdf.set_font("Arial", "", 10)
-            self.pdf.set_xy(self.pdf.get_x(), self.pdf.get_y())
-
-            self.pdf.multi_cell(usable_width, 0.45, line)
-
-        self.pdf.set_xy(self.default_x, self.pdf.get_y())
-
-    # ----------------------------------------------------------------------
-    # Public method to save the generated PDF
-    # ----------------------------------------------------------------------
-    def save(self, filename="cv.pdf"):
-        """Output the PDF to the given file."""
-        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-        self.pdf.output(str(OUTPUT_DIR / filename))
+    # ------------------------------------------------------------------
+    # Languages section
+    # ------------------------------------------------------------------
+    def _add_languages_section(self) -> None:
+        self._reset_x()
+        self._add_section_title("Langues")
+        self._text_line(
+            "Arabe : Langue maternelle | Anglais : Intermédiaire | Français : Opérationnel"
+        )
 
 
-# --------------------------------------------------------------------------
-# Usage example (produces exactly the same output as the original script)
 # --------------------------------------------------------------------------
 if __name__ == "__main__":
     cv = CVGenerator()
-    cv.save("Ouafik_Karam.pdf")
+    cv.save("Ouafik_Karam1.pdf")
