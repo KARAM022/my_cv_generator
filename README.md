@@ -1,56 +1,51 @@
 # CV Generator
 
-A small Python script that generates a PDF curriculum vitae using the `fpdf2` library.
+This project generates a CV PDF from `main.py` using `fpdf`.
 
-**Quick summary:** run the script to produce `full_cv.pdf` from the repository root.
-
-**Features**
-- Generate a styled PDF CV with profile, skills, experience, education, and languages.
-- Easy to customize by editing `main.py`.
+**What the script does**
+- Builds a PDF CV with a profile image, name, contact line, summary, skills, experience, education, and languages.
+- Saves the final file as `cv.pdf`.
 
 ## Requirements
 
 - Python 3.7 or later
-- `fpdf2` (listed in `requirements.txt`)
+- `fpdf2` from `requirements.txt`
+- `image.jpg` in the project root
+- `DejaVuSans-Bold.ttf` in the project root
 
-Install dependencies (recommended: use a virtual environment):
+## Install
+
+Create a virtual environment and install the dependency:
 
 ```bash
 python -m venv .venv
-source .venv/Scripts/activate   # Windows PowerShell: .venv\Scripts\Activate.ps1
+.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 ```
 
+If you are using Command Prompt or Git Bash, activate the virtual environment with the matching command for your shell.
+
 ## Usage
 
-Run the script to generate the CV PDF:
+Run the script from the project root:
 
 ```bash
 python main.py
 ```
 
-The script saves `full_cv.pdf` in the repository root and prints a confirmation message.
+The script creates `cv.pdf` in the same folder.
 
 ## Customization
 
-- Edit `main.py` to change the name, contact details, sections, or formatting.
-- The script uses a small `PDF` class (subclass of `FPDF`) — you can add methods or tweak fonts/sizes as needed.
-
-## Files
-
-- `main.py` — main script that builds and saves the CV PDF.
-- `requirements.txt` — Python dependency list (fpdf2).
-- `README.md` — this file.
-
-## Contributing
-
-Feel free to open issues or submit PRs with improvements. For small edits, editing `main.py` and updating the README is sufficient.
+- Edit `main.py` to change the name, contact details, summary, section text, or styling.
+- Replace `image.jpg` if you want a different profile photo.
+- Keep `DejaVuSans-Bold.ttf` available so the bullet points and Unicode text render correctly.
 
 ## Contact
 
-For questions or help, contact the repository owner:
+Email: ouafik0karam@gmail.com
 
-- **Email:** ouafik0karam@gmail.com
-- **Phone:** +212 608310554
-- **LinkedIn:** https://www.linkedin.com/in/karam-ouafik-67b040279
+Phone: +212 608310554
+
+LinkedIn: https://www.linkedin.com/in/karam-ouafik-67b040279
 
