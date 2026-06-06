@@ -11,13 +11,23 @@ class CVGenerator:
         self.pdf = FPDF("P", "cm", "A4")
         self.pdf.add_page()
         self.pdf.add_font("DejaVu", "", "DejaVuSans-Bold.ttf")  # Load DejaVu for Unicode support
+        self.pdf.set_auto_page_break(auto=True, margin=0)
 
         # Layout constants (same as original code)
         self.profile_x = 5.4      # X coordinate for text block
         self.profile_y = 0.1      # Initial Y coordinate for text block
-        self.default_x = 1.25  # X coordinate for sections after profile
-        self.default_y = 4.4  # Y coordinate for sections after profile
         self.default_space = 0.3  # Vertical gap adjustment
+
+        self.default_y = 4  # Y coordinate for sections after profile
+        self.default_x = 1.25  # X coordinate for sections after profile
+        self.default_space_after_line = 0.3  # Space after separator line
+        self.default_space_after_subtitle = 0.1  # Space after section subtitles
+        self.default_space_between_skills_sections = 0.1  # Space between skills subsections
+        self.default_space_between_sections = 0.4  # Space between main sections (skills, experience, education, languages)
+        self.default_space_between_experience_company_and_title = 0.1  # Space between company/duration line and title in experience section
+        self.default_space_after_experience_title = 0.1  # Space after experience title before tasks
+        self.default_space_between_experience_entries = 0.3  # Space between experience entries
+        self.default_space_between_education_entries = 0.1  # Space between education entries
 
         # Build the CV by calling each component in order
         self._add_image()
@@ -26,21 +36,95 @@ class CVGenerator:
         self._add_separator_line()
         self._add_description()
         self._add_skills_section()
+        self._space_between_sections()
         self._add_experience_section()
+        self._space_between_sections()
         self._add_education_section()
+        self._space_between_sections()
         self._add_languages_section()
 
+    # ----------------------------------------------------------------------
+    # Private methods for style and layout (e.g., adding images, setting fonts, drawing lines)
+    # ----------------------------------------------------------------------
+    def _text_single_line(self, variant="normal", text="Sample Text", ln=True, align="L"):
+        """Helper method to add a single line of text with consistent styling."""
+        self.pdf.set_font(
+            "Arial",
+            "" if variant == "normal" else "B",
+            12 if variant == "title" else 10
+        )
+        self.pdf.cell(
+            0,
+            0.5 if variant == "title" else 0.4,
+            text,
+            ln=ln,
+            align=align
+        )
+
+    def _left_align(self):
+        """Set left alignment for the current line."""
+        self.pdf.set_x(self.default_x)
+
+    def _space_after_line(self, space=None):
+        """Add vertical space after the current line."""
+        if space is None:
+            space = self.default_space_after_line
+        self.pdf.set_xy(self.default_x, self.pdf.get_y() + space)
+
+    def _space_after_subtitle(self, space=None):
+        """Add vertical space after a subtitle."""
+        if space is None:
+            space = self.default_space_after_subtitle
+        self.pdf.set_xy(self.default_x, self.pdf.get_y() + space)
+
+    def _space_between_skills_sections(self, space=None):
+        """Add vertical space between skills subsections."""
+        if space is None:
+            space = self.default_space_between_skills_sections
+        self.pdf.set_xy(self.default_x, self.pdf.get_y() + space)
+
+    def _space_between_sections(self, space=None):
+        """Add vertical space between main sections (skills, experience, education, languages)."""
+        if space is None:
+            space = self.default_space_between_sections
+        self.pdf.set_xy(self.default_x, self.pdf.get_y() + space)
+    
+    def _space_between_experience_company_and_title(self, space=None):
+        """Add vertical space between company/duration line and title in experience section."""
+        if space is None:
+            space = self.default_space_between_experience_company_and_title
+        self.pdf.set_xy(self.default_x, self.pdf.get_y() + space)
+    
+    def _space_after_experience_title(self, space=None):
+        """Add vertical space after experience title before tasks."""
+        if space is None:
+            space = self.default_space_after_experience_title
+        self.pdf.set_xy(self.default_x, self.pdf.get_y() + space)
+    
+    def _space_between_experience_entries(self, space=None):
+        """Add vertical space between experience entries."""
+        if space is None:
+            space = self.default_space_between_experience_entries
+        self.pdf.set_xy(self.default_x, self.pdf.get_y() + space)
+    
+    def _space_between_education_entries(self, space=None):
+        """Add vertical space between education entries."""
+        if space is None:
+            space = self.default_space_between_education_entries
+        self.pdf.set_xy(self.default_x, self.pdf.get_y() + space)
+
+    
     # ----------------------------------------------------------------------
     # Private methods for each part of the CV
     # ----------------------------------------------------------------------
     def _add_image(self):
         """Insert the profile image at fixed coordinates."""
         img_info = {
-            "path": "image.jpg",
-            "width": 3.31,
-            "height": 3.31,
+            "path": "image.png",
+            "width": 3,
+            "height": 3,
             "x": 1.25,
-            "y": 1
+            "y": 0.6
         }
         self.pdf.image(
             img_info["path"],
@@ -129,6 +213,7 @@ class CVGenerator:
             "Sécurité : Sécurité des applications web, déploiement & maintenance serveurs"
         )
         self._format_text_to_list(skills_content)
+        self._space_between_skills_sections()
         self._add_skills_section_subtitle("Ingénierie des Données")
         data_skills_content = (
             "Data Mining & Statistical Analysis\n"
@@ -215,103 +300,62 @@ class CVGenerator:
         self._add_education_content(education_content)
 
     def _add_languages_section(self):
-        self.pdf.set_x(self.default_x)
         """Add a 'Languages' section with a title and placeholder content."""
+        self._left_align()
         self._add_sections_title("Langues")
-        self.pdf.cell(0, 0.4, "Arabe : Langue maternelle | Anglais : Intermédiaire | Français : Opérationnel")
+        self._text_single_line(text="Arabe : Langue maternelle | Anglais : Intermédiaire | Français : Opérationnel")
+
     # ----------------------------------------------------------------------
     # Private methods to add section's component (e.g., title, subtitle, content)
     # ----------------------------------------------------------------------
     def _add_sections_title(self, title):
         """Add a section title (e.g., for skills or experience)."""
-        title_style = {
-            "font": "Arial",
-            "style": "B",
-            "size": 12,
-            "width": 0,
-            "height": 0.5,
-            "ln": True
-        }
-        self.pdf.set_font(
-            title_style["font"],
-            title_style["style"],
-            title_style["size"]
-        )
-        self.pdf.cell(
-            title_style["width"],
-            title_style["height"],
-            title,
-            ln=title_style["ln"]
-        )
+        self._text_single_line(variant="title", text=title, ln=True)
 
-        # Move cursor down for the line
-        self.pdf.set_xy(self.default_x, self.pdf.get_y())
+        self._left_align()
 
         # add a line under the section title
         self.pdf.set_draw_color(0, 0, 0)
         y_line = self.pdf.get_y()
         self.pdf.line(self.default_x, y_line, 20, y_line)
 
-        # Move cursor down after the line
-        self.pdf.set_xy(self.default_x, self.pdf.get_y() + 0.5)
+        self._space_after_line()
 
     def _add_skills_section_subtitle(self, subtitle):
         """Add a subtitle for the skills section (e.g., for a specific skill category)."""
-        subtitle_style = {
-            "font": "Arial",
-            "style": "B",
-            "size": 10,
-            "width": 0,
-            "height": 0.4,
-            "ln": True
-        }
-        self.pdf.set_font(
-            subtitle_style["font"],
-            subtitle_style["style"],
-            subtitle_style["size"]
-        )
-        self.pdf.cell(
-            subtitle_style["width"],
-            subtitle_style["height"],
-            subtitle,
-            ln=subtitle_style["ln"]
-        )
-
-        # Move cursor down for the content
-        self.pdf.set_xy(self.default_x, self.pdf.get_y())
+        self._left_align()
+        self._text_single_line(variant="subtitle", text=subtitle)
+        self._space_after_subtitle()
 
     def _add_experience_content(self, experience_content):
         """Add the experience content with company, duration, title and tasks."""
         for exp in experience_content:
-            # set position for each experience entry
-            self.pdf.set_xy(self.default_x, self.pdf.get_y())
+            self._left_align()
             # Company and duration
-            self.pdf.set_font("Arial", "B", 10)
-            self.pdf.cell(0, 0.4, f"{exp['company']}", ln=False)
-            self.pdf.cell(0, 0.4, f"{exp['duration']}", ln=True, align="R")
+            self._text_single_line(variant="subtitle", text=f"{exp['company']}", ln=False)
+            self._text_single_line(variant="subtitle", text=f"{exp['duration']}", align="R")
 
+            self._space_between_experience_company_and_title()
             # Title
-            self.pdf.set_x(self.default_x)
-            self.pdf.set_font("Arial", "", 10)
-            self.pdf.cell(0, 0.4, exp["title"], ln=True)
+            self._left_align()
+            self._text_single_line(text=exp["title"])
 
+            self._space_after_experience_title()
             # Tasks (formatted as bullet points)
             self._format_text_to_list(exp["tasks"])
-
-            # # Add space after each experience entry
-            # self.pdf.set_xy(self.default_x, self.pdf.get_y() + 0.5)
+            self._space_between_experience_entries() if exp != experience_content[-1] else None  # Add space between entries except after the last one
 
     def _add_education_content(self, education_content):
         """Add the education content with formation and institution-duration."""
         for edu in education_content:
             # set position for each education entry
-            self.pdf.set_x(self.default_x)
+            self._left_align()
             # Formation
-            self.pdf.set_font("Arial", "", 10)
-            self.pdf.cell(0, 0.4, f"{edu['formation']}", ln=False)
-            self.pdf.cell(0, 0.4, f"{edu['institution-duration']}", ln=True, align="R")
+            self._text_single_line(text=f"{edu['formation']}", ln=False)
+            self._text_single_line(text=f"{edu['institution-duration']}", ln=True, align="R")
 
- 
+            self._space_between_education_entries() if edu != education_content[-1] else None  # Add space between entries except after the last one
+
     # ----------------------------------------------------------------------
     # Private tools methods
     # ----------------------------------------------------------------------
@@ -354,4 +398,4 @@ class CVGenerator:
 # --------------------------------------------------------------------------
 if __name__ == "__main__":
     cv = CVGenerator()
-    cv.save("cv.pdf")
+    cv.save("Ouafik_Karam.pdf")
