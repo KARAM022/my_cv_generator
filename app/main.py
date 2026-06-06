@@ -1,4 +1,12 @@
+from pathlib import Path
+
 from fpdf import FPDF
+
+
+BASE_DIR = Path(__file__).resolve().parents[1]
+FONT_PATH = BASE_DIR / "assets" / "fonts" / "DejaVuSans-Bold.ttf"
+IMAGE_PATH = BASE_DIR / "assets" / "images" / "image.png"
+OUTPUT_DIR = BASE_DIR / "output"
 
 class CVGenerator:
     """
@@ -10,7 +18,7 @@ class CVGenerator:
         # Initialize PDF document (portrait, centimeters, A4)
         self.pdf = FPDF("P", "cm", "A4")
         self.pdf.add_page()
-        self.pdf.add_font("DejaVu", "", "DejaVuSans-Bold.ttf")  # Load DejaVu for Unicode support
+        self.pdf.add_font("DejaVu", "", str(FONT_PATH))  # Load DejaVu for Unicode support
         self.pdf.set_auto_page_break(auto=True, margin=0)
 
         # Layout constants (same as original code)
@@ -120,7 +128,7 @@ class CVGenerator:
     def _add_image(self):
         """Insert the profile image at fixed coordinates."""
         img_info = {
-            "path": "image.png",
+            "path": IMAGE_PATH,
             "width": 3,
             "height": 3,
             "x": 1.25,
@@ -390,7 +398,8 @@ class CVGenerator:
     # ----------------------------------------------------------------------
     def save(self, filename="cv.pdf"):
         """Output the PDF to the given file."""
-        self.pdf.output(filename)
+        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        self.pdf.output(str(OUTPUT_DIR / filename))
 
 
 # --------------------------------------------------------------------------
