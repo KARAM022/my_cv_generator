@@ -1,1 +1,5 @@
 **/*.pdf
+# images
+**/*.jpg
+**/*.jpeg
+**/*.png
