@@ -11,10 +11,11 @@ This project generates a CV PDF from `main.py` using `fpdf`.
 
 - Python 3.7 or later
 - `fpdf2` from `requirements.txt`
--- `image.jpg` (source photo) in the project root
--- `rounded_image.py` (helper) in the project root — produces `image.png`
--- `image.png` (rounded profile image) in the project root — used by `main.py`
--- `DejaVuSans-Bold.ttf` in the project root
+- `Pillow` from `requirements.txt`
+- `image.jpg` (source photo) in the project root
+- `rounded_image.py` (helper) in the project root — produces `image.png`
+- `image.png` (rounded profile image) in the project root — used by `main.py`
+- `DejaVuSans-Bold.ttf` in the project root
 
 ## Install
 
