@@ -46,8 +46,8 @@ The script creates `Ouafik_Karam.pdf` in the same folder by default.
 ## Customization
 
 - Edit `main.py` to change the name, contact details, summary, section text, or styling.
--- Replace `image.jpg` to use a different profile photo; run `rounded_image.py` afterwards to regenerate `image.png`.
--- Keep `DejaVuSans-Bold.ttf` available so the bullets and Unicode text render correctly.
+- Replace `image.jpg` to use a different profile photo; run `rounded_image.py` afterwards to regenerate `image.png`.
+- Keep `DejaVuSans-Bold.ttf` available so the bullets and Unicode text render correctly.
 
 ## Contact
 
