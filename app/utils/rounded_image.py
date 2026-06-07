@@ -1,3 +1,4 @@
+from pathlib import Path
 from PIL import Image, ImageDraw
 
 def make_round_image(input_path, output_path):
@@ -15,4 +16,9 @@ def make_round_image(input_path, output_path):
 
     result.save(output_path)
 
-make_round_image("image.jpg", "image.png")
+if __name__ == "__main__":
+    base_dir = Path(__file__).resolve().parents[2]
+    input_image = base_dir / "assets" / "images" / "image.jpg"
+    output_image = base_dir / "assets" / "images" / "image.png"
+
+    make_round_image(input_image, output_image)

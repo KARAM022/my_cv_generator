@@ -1,53 +1,60 @@
 # CV Generator
 
-This project generates a CV PDF from `main.py` using `fpdf`.
+This project generates a CV PDF from the reorganized code under `app/` and stores generated files in `output/`.
 
-**What the scripts do**
-- `rounded_image.py` converts `image.jpg` into a rounded `image.png` used in the PDF header.
-- `main.py` builds a PDF CV with a profile image, name, contact line, summary, skills, experience, education, and languages.
-- The script saves the final file as `Ouafik_Karam.pdf` by default.
+What the repository contains
+- `app/main.py` — the class-based CV generator. It reads assets under `assets/` and writes PDFs to `output/`.
+- `app/utils/rounded_image.py` — helper that converts `assets/images/image.jpg` → `assets/images/image.png` (rounded).
+- `assets/images/` — image assets (`image.jpg`, `image.png`).
+- `assets/fonts/` — font files (e.g. `DejaVuSans-Bold.ttf`).
+- `output/` — generated PDFs (created automatically by `app/main.py`).
+- `requirements.txt`, `README.md`, `.gitignore` at repository root.
+
+Quick summary
+- Run `app/utils/rounded_image.py` to prepare the rounded profile image.
+- Run `app/main.py` to generate the CV PDF. The default output file is written to `output/Ouafik_Karam.pdf`.
 
 ## Requirements
 
 - Python 3.7 or later
-- `fpdf2` from `requirements.txt`
-- `Pillow` from `requirements.txt`
-- `image.jpg` (source photo) in the project root
-- `rounded_image.py` (helper) in the project root — produces `image.png`
-- `image.png` (rounded profile image) in the project root — used by `main.py`
-- `DejaVuSans-Bold.ttf` in the project root
+- Dependencies listed in `requirements.txt` (`fpdf2`, `Pillow`)
 
 ## Install
 
-Create a virtual environment and install the dependency:
+Create and activate a virtual environment, then install dependencies:
 
 ```bash
 python -m venv .venv
-.venv\Scripts\Activate.ps1
+.venv\Scripts\Activate.ps1   # PowerShell
 python -m pip install -r requirements.txt
 ```
 
-If you are using Command Prompt or Git Bash, activate the virtual environment with the matching command for your shell.
+If you use Command Prompt or Git Bash, use the corresponding venv activation command for your shell.
 
 ## Usage
 
-Create a rounded profile image and run the generator from the project root:
+1. Put your source photo at `assets/images/image.jpg` (replace the existing file if present).
+2. Generate the rounded image (this writes `assets/images/image.png`):
 
 ```bash
-# create a rounded PNG from image.jpg
-python rounded_image.py
-
-# generate the PDF
-python main.py
+python app/utils/rounded_image.py
 ```
 
-The script creates `Ouafik_Karam.pdf` in the same folder by default.
+3. Generate the PDF (creates `output/Ouafik_Karam.pdf` by default):
+
+```bash
+python app/main.py
+```
+
+Notes
+- `app/main.py` resolves asset paths relative to the repository and expects fonts in `assets/fonts/` and images in `assets/images/`.
+- The `output/` directory is created automatically; add `output/` to `.gitignore` if you don't want generated PDFs tracked.
 
 ## Customization
 
-- Edit `main.py` to change the name, contact details, summary, section text, or styling.
-- Replace `image.jpg` to use a different profile photo; run `rounded_image.py` afterwards to regenerate `image.png`.
-- Keep `DejaVuSans-Bold.ttf` available so the bullets and Unicode text render correctly.
+- Edit `app/main.py` to change displayed name, contact details, section text, or styling.
+- Replace `assets/images/image.jpg` with a different photo and re-run `app/utils/rounded_image.py`.
+- Add or replace font files in `assets/fonts/` as needed.
 
 ## Contact
 
